@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Resume Report | Rishi Pandey</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🤖 AI Resume Analysis Report</h1>
+
+    <div class="score-card">
+
+        <h2>Resume Match Score</h2>
+        <div class="ats-circle" style="border-color:{{color}};">
+    <div class="ats-score" style="color:{{color}};">
+        {{score}}%
+    </div>
+</div>
+
+<h3 style="color:{{color}};">
+    {{recommendation}}
+</h3>
+
+
+        <h3 style="color:{{color}}">
+            {{recommendation}}
+        </h3>
+
+    </div>
+
+    <hr>
+
+    <h2>📄 Uploaded Resume</h2>
+
+    <div class="box">
+
+        {{filename}}
+
+    </div>
+
+    <hr>
+
+    <h2>💼 Job Description</h2>
+
+    <div class="box">
+
+        <pre>{{job_description}}</pre>
+
+    </div>
+
+    <hr>
+
+    <h2>🧠 Resume Skills</h2>
+
+    <ul>
+
+        {% for skill in resume_skills %}
+
+        <li>✅ {{skill}}</li>
+
+        {% endfor %}
+
+    </ul>
+
+    <hr>
+
+    <h2>🎯 Required Skills</h2>
+
+    <ul>
+
+        {% for skill in jd_skills %}
+
+        <li>📌 {{skill}}</li>
+
+        {% endfor %}
+
+    </ul>
+
+    <hr>
+
+    <h2>✔ Matched Skills</h2>
+
+    <ul>
+
+        {% for skill in matched_skills %}
+
+        <li style="color:green;">
+            {{skill}}
+        </li>
+
+        {% endfor %}
+
+    </ul>
+
+    <hr>
+
+    <h2>❌ Missing Skills</h2>
+
+    <ul>
+
+        {% for skill in missing_skills %}
+
+        <li style="color:red;">
+            {{skill}}
+        </li>
+
+        {% endfor %}
+
+    </ul>
+
+    <hr>
+    <hr>
+
+<h2>💡 AI Resume Improvement Suggestions</h2>
+
+<div class="box">
+
+    {% if suggestions %}
+
+        <ul>
+
+        {% for suggestion in suggestions %}
+
+            <li>🚀 {{ suggestion }}</li>
+
+        {% endfor %}
+
+        </ul>
+
+    {% else %}
+
+        <p>🎉 Excellent! Your resume looks strong.</p>
+
+    {% endif %}
+
+</div>
+
+<hr>
+
+    <h2>📃 Resume Text</h2>
+
+    <div class="box">
+
+        <pre>{{resume_text}}</pre>
+
+    </div>
+
+    <br>
+
+    <a href="/" class="btn">
+
+        🔄 Analyze Another Resume
+
+    </a>
+    <br><br>
+
+<a href="/download" class="btn">
+    📄 Download PDF Report
+</a>
+
+<br><br>
+
+<a href="/history" class="btn">
+    📋 View Resume History
+</a>
+
+    <br><br>
+
+    <div class="developer">
+
+        <p>Professional AI Resume Screening System</p>
+
+        <h2 class="developer-name">
+
+            Developed by Rishi Pandey
+
+        </h2>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>
