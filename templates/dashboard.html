@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — HireSense AI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="header-intro">
+        <h1 class="page-title">Recruiter Operations Dashboard</h1>
+        <p class="page-subtitle">Real-time candidate pipeline intelligence and screening metrics</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('screen') }}" class="btn btn-primary">
+            <span class="btn-icon">⚡</span> Run New Screening
+        </a>
+        <a href="{{ url_for('seed_demo') }}" class="btn btn-outline-secondary" title="Load sample candidates for presentation evaluation">
+            <span class="btn-icon">✨</span> Load Demo Data
+        </a>
+    </div>
+</div>
+
+<!-- Key Performance Metrics (Calculated from Real Database Data) -->
+<div class="metrics-grid">
+    <div class="metric-card">
+        <div class="metric-icon bg-blue">💼</div>
+        <div class="metric-info">
+            <span class="metric-value">{{ total_jobs }}</span>
+            <span class="metric-label">Total Job Openings</span>
+        </div>
+    </div>
+
+    <div class="metric-card">
+        <div class="metric-icon bg-indigo">📄</div>
+        <div class="metric-info">
+            <span class="metric-value">{{ total_candidates }}</span>
+            <span class="metric-label">Resumes Processed</span>
+        </div>
+    </div>
+
+    <div class="metric-card">
+        <div class="metric-icon bg-emerald">🎯</div>
+        <div class="metric-info">
+            <span class="metric-value">{{ shortlisted_count }}</span>
+            <span class="metric-label">Shortlisted Candidates</span>
+        </div>
+    </div>
+
+    <div class="metric-card">
+        <div class="metric-icon bg-amber">⭐</div>
+        <div class="metric-info">
+            <span class="metric-value">{{ avg_score }}%</span>
+            <span class="metric-label">Average Match Score</span>
+        </div>
+    </div>
+</div>
+
+<!-- Main Dashboard Columns -->
+<div class="dashboard-columns">
+    <!-- Left Column: Recent Jobs -->
+    <div class="dashboard-section card">
+        <div class="section-header">
+            <h2 class="section-title">Active Job Openings</h2>
+            <a href="{{ url_for('jobs_list') }}" class="link-more">View All &rarr;</a>
+        </div>
+
+        {% if recent_jobs %}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Job Title</th>
+                            <th>Dept</th>
+                            <th>Candidates</th>
+                            <th>Avg Score</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for job in recent_jobs %}
+                            <tr>
+                                <td>
+                                    <div class="job-cell-title">
+                                        <strong>{{ job['title'] }}</strong>
+                                        <span class="badge-status">{{ job['status'] }}</span>
+                                    </div>
+                                </td>
+                                <td>{{ job['department'] }}</td>
+                                <td><span class="count-badge">{{ job['candidate_count'] }}</span></td>
+                                <td>
+                                    {% if job['avg_job_score'] %}
+                                        <strong>{{ "%.1f"|format(job['avg_job_score']) }}%</strong>
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('results', job_id=job['id']) }}" class="btn btn-sm btn-outline-primary">
+                                        Review
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📁</div>
+                <h3>No Job Openings Created Yet</h3>
+                <p>Start by creating a job description and uploading candidate resumes to rank.</p>
+                <a href="{{ url_for('screen') }}" class="btn btn-primary btn-sm">Create First Screening</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Right Column: Recent Candidate Screenings -->
+    <div class="dashboard-section card">
+        <div class="section-header">
+            <h2 class="section-title">Latest Candidate Screenings</h2>
+            <a href="{{ url_for('history') }}" class="link-more">View History &rarr;</a>
+        </div>
+
+        {% if recent_candidates %}
+            <div class="candidates-mini-list">
+                {% for cand in recent_candidates %}
+                    <div class="candidate-mini-card">
+                        <div class="cand-mini-avatar">
+                            {{ cand['name'][:1] }}
+                        </div>
+                        <div class="cand-mini-info">
+                            <h4 class="cand-mini-name">{{ cand['name'] }}</h4>
+                            <p class="cand-mini-role">{{ cand['job_title'] or 'General Screening' }}</p>
+                            <span class="cand-mini-file">{{ cand['filename'] }}</span>
+                        </div>
+                        <div class="cand-mini-score">
+                            <span class="score-badge {% if cand['score'] >= 80 %}score-high{% elif cand['score'] >= 60 %}score-mid{% elif cand['score'] >= 40 %}score-fair{% else %}score-low{% endif %}">
+                                {{ "%.1f"|format(cand['score']) }}%
+                            </span>
+                            <span class="status-pill status-{{ cand['status']|lower|replace(' ', '-') }}">
+                                {{ cand['status'] }}
+                            </span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">👥</div>
+                <h3>No Candidates Evaluated</h3>
+                <p>Upload candidate resumes or click <strong>Load Demo Data</strong> to populate a demonstration pipeline.</p>
+                <a href="{{ url_for('seed_demo') }}" class="btn btn-outline-secondary btn-sm">Load Sample Data</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Evaluator Demonstration Banner -->
+<div class="evaluator-callout">
+    <div class="callout-icon">🎓</div>
+    <div class="callout-content">
+        <h4>B.Tech CSE Startup Demonstration Quick Guide</h4>
+        <p>
+            <strong>Evaluator Workflow:</strong> Click <strong>New Screening</strong> &rarr; Fill job requirements &rarr; Upload multiple PDF/DOCX resumes &rarr; View AI match rankings &rarr; Filter & toggle shortlist status &rarr; Export to CSV or PDF report.
+            To test immediately without preparing local resume files, click <strong>Load Demo Data</strong>.
+        </p>
+    </div>
+    <div class="callout-actions">
+        <a href="{{ url_for('seed_demo') }}" class="btn btn-sm btn-light">Load Demo Pipeline</a>
+        <a href="{{ url_for('clear_demo') }}" class="btn btn-sm btn-outline-light">Clear Demo Data</a>
+    </div>
+</div>
+{% endblock %}

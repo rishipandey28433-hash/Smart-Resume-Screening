@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}About HireSense AI — Startup Overview & Architecture{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="header-intro">
+        <h1 class="page-title">About HireSense AI</h1>
+        <p class="page-subtitle">Smarter Screening. Better Hiring. — Transforming technical recruiting with explainable AI</p>
+    </div>
+</div>
+
+<div class="about-grid">
+    <!-- Left Column: Mission & Problem/Solution -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">1. Executive Summary & Value Proposition</h3>
+        </div>
+        <div class="card-body">
+            <p>
+                <strong>HireSense AI</strong> is an intelligent resume screening and candidate ranking platform engineered to eliminate 
+                recruitment bottlenecks for fast-moving hiring teams. In contemporary hiring workflows, recruiters receive hundreds 
+                of applications per technical opening, spending an average of 15–20 hours per role conducting manual, error-prone initial reviews.
+            </p>
+            <p>
+                HireSense AI addresses this challenge through a transparent, hybrid AI scoring model that evaluates candidates purely on 
+                <strong>objective, job-relevant criteria</strong>—drastically reducing time-to-first-interview while maintaining recruiter trust and compliance.
+            </p>
+
+            <h4 class="mt-4">Core Value Proposition</h4>
+            <div class="value-props-list">
+                <div class="prop-item">
+                    <span class="prop-icon">⚡</span>
+                    <div>
+                        <strong>Rapid Initial Screening:</strong>
+                        <p>Process batches of 50+ resumes in seconds across PDF, DOCX, and TXT formats without manual parsing.</p>
+                    </div>
+                </div>
+                <div class="prop-item">
+                    <span class="prop-icon">🔍</span>
+                    <div>
+                        <strong>Transparent & Explainable Matching:</strong>
+                        <p>Every score is broken down into text similarity, mandatory skill coverage, and missing qualifications.</p>
+                    </div>
+                </div>
+                <div class="prop-item">
+                    <span class="prop-icon">⚖️</span>
+                    <div>
+                        <strong>Responsible AI by Design:</strong>
+                        <p>No protected demographic characteristics (gender, age, ethnicity, disability) are utilized or inferred.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Target Customers & Startup Context -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">2. Target Market & Beneficiaries</h3>
+        </div>
+        <div class="card-body">
+            <ul class="target-market-list">
+                <li>
+                    <strong>Early-Stage Startups & SMBs:</strong>
+                    <p>Teams without dedicated recruiting operations that need high-precision candidate shortlisting quickly.</p>
+                </li>
+                <li>
+                    <strong>Recruitment Consultancies & Agencies:</strong>
+                    <p>Firms managing multiple simultaneous client pipelines requiring structured CSV and PDF evaluation summaries.</p>
+                </li>
+                <li>
+                    <strong>Internal HR & Talent Acquisition Teams:</strong>
+                    <p>Organizations aiming to standardize their initial applicant triage and eliminate subjective reviewer fatigue.</p>
+                </li>
+                <li>
+                    <strong>University Training & Placement Cells:</strong>
+                    <p>Academic institutions assessing student resume readiness against target company job descriptions.</p>
+                </li>
+            </ul>
+
+            <h4 class="mt-4">Responsible AI Charter</h4>
+            <div class="ethical-notice-card">
+                <p>
+                    <strong>Recruiter-in-the-Loop Principle:</strong> HireSense AI is an assistive decision-support system. 
+                    The software does not make autonomous rejection or hiring decisions. Match scores represent textual and keyword 
+                    alignment with the requisition, not a measure of individual potential. Final decisions require human recruiter evaluation.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Technology Stack & Architecture -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h3 class="card-title">3. Technology Stack & System Architecture</h3>
+    </div>
+    <div class="card-body">
+        <div class="tech-stack-grid">
+            <div class="tech-box">
+                <h4>Backend & Core Engine</h4>
+                <p><strong>Python 3.11 & Flask:</strong> Modular WSGI micro-framework managing routing, sessions, and request dispatch.</p>
+            </div>
+            <div class="tech-box">
+                <h4>Natural Language Processing</h4>
+                <p><strong>Scikit-Learn TF-IDF:</strong> Vectorization and cosine similarity calculation for semantic overlap estimation.</p>
+            </div>
+            <div class="tech-box">
+                <h4>Document Extraction</h4>
+                <p><strong>pdfplumber & python-docx:</strong> Robust text extraction with fallback error handling for corrupted documents.</p>
+            </div>
+            <div class="tech-box">
+                <h4>Persistence & Security</h4>
+                <p><strong>SQLite & Werkzeug:</strong> Parameterized SQL operations, salted password hashing, and formula injection protection.</p>
+            </div>
+            <div class="tech-box">
+                <h4>Reporting & Exports</h4>
+                <p><strong>ReportLab:</strong> Dynamic high-resolution PDF generation and sanitized tabular CSV reporting.</p>
+            </div>
+            <div class="tech-box">
+                <h4>Frontend Architecture</h4>
+                <p><strong>Vanilla CSS & Semantic HTML:</strong> Accessible, responsive, zero-dependency modern recruitment interface.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

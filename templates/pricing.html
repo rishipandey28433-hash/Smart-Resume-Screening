@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Proposed Pricing Plans — HireSense AI{% endblock %}
+
+{% block content %}
+<div class="pricing-header text-center">
+    <span class="badge-pill-notice">Startup Commercial Model Preview</span>
+    <h1 class="page-title mt-2">Flexible, Transparent Pricing for Growing Teams</h1>
+    <p class="page-subtitle max-w-700 mx-auto">
+        Designed for small and medium businesses (SMBs), technical startups, HR teams, and recruitment consultancies.
+    </p>
+    <div class="alert alert-info max-w-700 mx-auto mt-3">
+        <strong>Academic & Prototype Notice:</strong> The pricing tiers displayed below represent our proposed commercial model for evaluation purposes. No real payment processing is enabled in this prototype demonstration.
+    </div>
+</div>
+
+<div class="pricing-grid">
+    <!-- Free Trial Tier -->
+    <div class="pricing-card card">
+        <div class="pricing-card-header">
+            <h3 class="tier-name">Free Trial</h3>
+            <p class="tier-desc">Ideal for students, evaluation committees, and hiring tests.</p>
+            <div class="tier-price">
+                <span class="currency">&#8377;</span>
+                <span class="amount">0</span>
+                <span class="period">/ 14 days</span>
+            </div>
+            <span class="proposed-badge">Proposed Tier</span>
+        </div>
+        <div class="pricing-card-body">
+            <ul class="tier-features">
+                <li><span class="check">✓</span> <strong>Up to 25 resumes</strong> per batch</li>
+                <li><span class="check">✓</span> <strong>TF-IDF & Skill Matching</strong> hybrid engine</li>
+                <li><span class="check">✓</span> <strong>PDF, DOCX & TXT</strong> parser support</li>
+                <li><span class="check">✓</span> <strong>CSV candidate exports</strong> with formula protection</li>
+                <li><span class="check">✓</span> Basic PDF assessment summary</li>
+                <li class="disabled"><span class="cross">✗</span> Multi-recruiter team seats</li>
+                <li class="disabled"><span class="cross">✗</span> ATS webhook integration (Planned)</li>
+            </ul>
+        </div>
+        <div class="pricing-card-footer">
+            <a href="{{ url_for('screen') }}" class="btn btn-outline-primary btn-block">
+                Start Screening Now
+            </a>
+        </div>
+    </div>
+
+    <!-- Starter Tier (Highlighted) -->
+    <div class="pricing-card card popular">
+        <div class="popular-ribbon">Most Popular for Startups</div>
+        <div class="pricing-card-header">
+            <h3 class="tier-name">Starter Plan</h3>
+            <p class="tier-desc">For fast-growing startups and boutique recruitment consultancies.</p>
+            <div class="tier-price">
+                <span class="currency">&#8377;</span>
+                <span class="amount">2,499</span>
+                <span class="period">/ month (Proposed)</span>
+            </div>
+            <span class="proposed-badge">Estimated Pricing</span>
+        </div>
+        <div class="pricing-card-body">
+            <ul class="tier-features">
+                <li><span class="check">✓</span> <strong>Up to 500 resumes</strong> per month</li>
+                <li><span class="check">✓</span> <strong>Unlimited job openings</strong> and screening pipelines</li>
+                <li><span class="check">✓</span> <strong>Full Explainability Dashboard</strong> with skill gaps</li>
+                <li><span class="check">✓</span> <strong>Customizable scoring weights</strong> (Skills vs. Context)</li>
+                <li><span class="check">✓</span> <strong>Branded candidate PDF reports</strong></li>
+                <li><span class="check">✓</span> 3 Recruiter seats included</li>
+                <li class="disabled"><span class="cross">✗</span> Custom ATS API connectors (Planned)</li>
+            </ul>
+        </div>
+        <div class="pricing-card-footer">
+            <a href="{{ url_for('screen') }}" class="btn btn-primary btn-block">
+                Choose Starter
+            </a>
+        </div>
+    </div>
+
+    <!-- Business Tier -->
+    <div class="pricing-card card">
+        <div class="pricing-card-header">
+            <h3 class="tier-name">Business / Agency</h3>
+            <p class="tier-desc">For mid-market enterprises and volume recruitment agencies.</p>
+            <div class="tier-price">
+                <span class="currency">&#8377;</span>
+                <span class="amount">6,999</span>
+                <span class="period">/ month (Proposed)</span>
+            </div>
+            <span class="proposed-badge">Estimated Pricing</span>
+        </div>
+        <div class="pricing-card-body">
+            <ul class="tier-features">
+                <li><span class="check">✓</span> <strong>Unlimited resume screenings</strong></li>
+                <li><span class="check">✓</span> <strong>Batch multi-job ranking</strong> & cross-comparison</li>
+                <li><span class="check">✓</span> <strong>Custom skill taxonomies</strong> for niche domains</li>
+                <li><span class="check">✓</span> <strong>Priority processing queue</strong> for large ZIP files</li>
+                <li><span class="check">✓</span> 10 Recruiter seats with role-based permissions</li>
+                <li><span class="check">✓</span> Dedicated email & Slack support</li>
+                <li class="disabled"><span class="cross">✗</span> Enterprise SSO / LDAP (Planned)</li>
+            </ul>
+        </div>
+        <div class="pricing-card-footer">
+            <a href="{{ url_for('screen') }}" class="btn btn-outline-primary btn-block">
+                Choose Business
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Comparison Table: Current vs. Roadmap Features -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h3 class="card-title">Feature Availability: Prototype vs. Production Roadmap</h3>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Capability</th>
+                        <th width="150" class="text-center">Current Prototype</th>
+                        <th width="150" class="text-center">Commercial Roadmap</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>PDF, DOCX & Plain Text Parsing</strong></td>
+                        <td class="text-center"><span class="badge-status">Implemented</span></td>
+                        <td class="text-center">OCR for Scanned PDFs</td>
+                    </tr>
+                    <tr>
+                        <td><strong>TF-IDF & Cosine Contextual Matching</strong></td>
+                        <td class="text-center"><span class="badge-status">Implemented</span></td>
+                        <td class="text-center">Sentence Transformers (SBERT)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Word-Boundary Safe Skill Extraction</strong></td>
+                        <td class="text-center"><span class="badge-status">Implemented</span></td>
+                        <td class="text-center">Deep Learning NER Tagging</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Recruiter Pipeline (Shortlist / Reject)</strong></td>
+                        <td class="text-center"><span class="badge-status">Implemented</span></td>
+                        <td class="text-center">Multi-Stage Kanban Board</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Formula-Safe CSV & PDF Export</strong></td>
+                        <td class="text-center"><span class="badge-status">Implemented</span></td>
+                        <td class="text-center">Custom White-label Exports</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Applicant Tracking System (ATS) Webhooks</strong></td>
+                        <td class="text-center"><span class="text-muted">Planned</span></td>
+                        <td class="text-center">Greenhouse & Lever Integration</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

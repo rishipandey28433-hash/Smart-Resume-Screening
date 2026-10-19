@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HireSense AI — Resume Screening & Candidate Ranking{% endblock %}</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Main Style -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <header class="app-header">
+        <div class="nav-container">
+            <a href="{{ url_for('dashboard') }}" class="brand-logo">
+                <svg class="logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="32" height="32" rx="8" fill="#1E3A8A"/>
+                    <path d="M9 16L14 21L23 11" stroke="#38BDF8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="23" cy="11" r="2.5" fill="#60A5FA"/>
+                </svg>
+                <div class="brand-text">
+                    <span class="brand-title">HireSense<span class="brand-ai">AI</span></span>
+                    <span class="brand-tagline">Smarter Screening. Better Hiring.</span>
+                </div>
+            </a>
+
+            <nav class="nav-menu">
+                <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                    <span class="nav-icon">📊</span> Dashboard
+                </a>
+                <a href="{{ url_for('screen') }}" class="nav-link {% if request.endpoint == 'screen' %}active{% endif %}">
+                    <span class="nav-icon">⚡</span> New Screening
+                </a>
+                <a href="{{ url_for('jobs_list') }}" class="nav-link {% if request.endpoint == 'jobs_list' %}active{% endif %}">
+                    <span class="nav-icon">💼</span> Jobs
+                </a>
+                <a href="{{ url_for('history') }}" class="nav-link {% if request.endpoint == 'history' %}active{% endif %}">
+                    <span class="nav-icon">📋</span> History
+                </a>
+                <a href="{{ url_for('pricing') }}" class="nav-link {% if request.endpoint == 'pricing' %}active{% endif %}">
+                    <span class="nav-icon">💎</span> Pricing
+                </a>
+                <a href="{{ url_for('about') }}" class="nav-link {% if request.endpoint == 'about' %}active{% endif %}">
+                    <span class="nav-icon">ℹ️</span> About
+                </a>
+            </nav>
+
+            <div class="nav-user-actions">
+                {% if session.get('user_id') or session.get('is_guest') %}
+                    <div class="user-badge">
+                        <span class="status-indicator"></span>
+                        <span class="user-name">
+                            {% if session.get('is_guest') %}
+                                Guest Recruiter (Demo)
+                            {% else %}
+                                {{ current_user.full_name or session.get('username') }}
+                            {% endif %}
+                        </span>
+                        <a href="{{ url_for('logout') }}" class="btn-logout" title="Sign Out">Sign Out</a>
+                    </div>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-sm">Sign In</a>
+                    <a href="{{ url_for('register') }}" class="btn btn-primary btn-sm">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Body -->
+    <main class="main-content">
+        <div class="content-wrapper">
+            <!-- Flash Message Alerts -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="alerts-container">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">
+                                <span class="alert-text">{{ message }}</span>
+                                <button type="button" class="alert-close" onclick="this.parentElement.style.display='none';">&times;</button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Platform Footer -->
+    <footer class="app-footer">
+        <div class="footer-container">
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <span class="footer-logo">HireSense <strong>AI</strong></span>
+                    <p class="footer-tagline">AI-Powered Resume Screening and Candidate Ranking Platform</p>
+                    <p class="footer-meta">Academic Prototype for B.Tech CSE Startup & Entrepreneurial Activity</p>
+                </div>
+                <div class="footer-links">
+                    <div class="link-group">
+                        <h4>Platform</h4>
+                        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                        <a href="{{ url_for('screen') }}">New Screening</a>
+                        <a href="{{ url_for('jobs_list') }}">Active Openings</a>
+                        <a href="{{ url_for('history') }}">Screening History</a>
+                    </div>
+                    <div class="link-group">
+                        <h4>Startup</h4>
+                        <a href="{{ url_for('about') }}">About HireSense</a>
+                        <a href="{{ url_for('pricing') }}">Proposed Plans</a>
+                        <a href="{{ url_for('settings') }}">System Architecture</a>
+                    </div>
+                    <div class="link-group">
+                        <h4>Demo Mode</h4>
+                        <a href="{{ url_for('seed_demo') }}">Load Demo Candidates</a>
+                        <a href="{{ url_for('clear_demo') }}">Remove Demo Data</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; {{ current_year }} HireSense AI. All rights reserved.</p>
+                <p class="disclaimer-text">
+                    <strong>Responsible AI Notice:</strong> HireSense AI generates matching indicators strictly for job-relevant criteria. 
+                    All final hiring judgments are made by human recruiters.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

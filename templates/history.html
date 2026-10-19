@@ -1,48 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resume History</title>
+{% block title %}Screening History — HireSense AI{% endblock %}
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-
-<body>
-
-<div class="container">
-
-    <h1>📋 Resume History</h1>
-
-    <table border="1" width="100%" cellpadding="10">
-
-        <tr>
-            <th>Resume</th>
-            <th>Score</th>
-            <th>Recommendation</th>
-        </tr>
-
-        {% for resume in resumes %}
-
-        <tr>
-            <td>{{ resume[0] }}</td>
-            <td>{{ resume[1] }}%</td>
-            <td>{{ resume[2] }}</td>
-        </tr>
-
-        {% endfor %}
-
-    </table>
-
-    <br>
-
-    <a href="/" class="btn">
-        ⬅ Back to Home
-    </a>
-
+{% block content %}
+<div class="page-header">
+    <div class="header-intro">
+        <h1 class="page-title">Screening Activity History</h1>
+        <p class="page-subtitle">Historical log of all individual and batch resume assessments processed by HireSense AI</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('screen') }}" class="btn btn-primary">
+            <span class="btn-icon">⚡</span> Run New Screening
+        </a>
+    </div>
 </div>
 
-</body>
-
-</html>
+<div class="card">
+    {% if resumes %}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th width="80">Index</th>
+                        <th>Resume Filename</th>
+                        <th width="160">Match Score</th>
+                        <th width="200">Evaluation Tier</th>
+                        <th width="140">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for resume in resumes %}
+                        <tr>
+                            <td><span class="count-badge">#{{ loop.index }}</span></td>
+                            <td>
+                                <strong>{{ resume[0] }}</strong>
+                            </td>
+                            <td>
+                                <span class="score-badge {% if resume[1] >= 80 %}score-high{% elif resume[1] >= 60 %}score-mid{% elif resume[1] >= 40 %}score-fair{% else %}score-low{% endif %}">
+                                    {{ "%.1f"|format(resume[1]) }}%
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge-status">{{ resume[2] }}</span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('download_report') }}" class="btn btn-sm btn-outline-secondary">
+                                    PDF Summary
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <h3>No Screening History Found</h3>
+            <p>Upload your first candidate resume to begin tracking evaluations.</p>
+            <a href="{{ url_for('screen') }}" class="btn btn-primary">Start AI Screening</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

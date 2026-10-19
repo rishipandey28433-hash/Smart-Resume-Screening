@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In — HireSense AI{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card card">
+        <div class="auth-header text-center">
+            <div class="auth-logo">
+                <svg viewBox="0 0 32 32" width="48" height="48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="32" height="32" rx="8" fill="#1E3A8A"/>
+                    <path d="M9 16L14 21L23 11" stroke="#38BDF8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="23" cy="11" r="2.5" fill="#60A5FA"/>
+                </svg>
+            </div>
+            <h2 class="auth-title">Recruiter Portal Sign In</h2>
+            <p class="auth-subtitle">Access your AI candidate screening pipeline</p>
+        </div>
+
+        <form action="{{ url_for('login') }}" method="POST" class="auth-form">
+            <div class="form-group">
+                <label for="username" class="form-label">Username or Email</label>
+                <input type="text" name="username" id="username" class="form-control" placeholder="Enter username or email" required autofocus>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" name="password" id="password" class="form-control" placeholder="Enter password" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg">
+                Sign In to HireSense
+            </button>
+        </form>
+
+        <div class="auth-divider">
+            <span>OR QUICK EVALUATION ACCESS</span>
+        </div>
+
+        <!-- 1-Click Guest Bypass for College Evaluator Convenience -->
+        <form action="{{ url_for('login') }}" method="POST">
+            <input type="hidden" name="action" value="guest">
+            <button type="submit" class="btn btn-outline-secondary btn-block" title="Instant evaluator login without requiring credentials">
+                ⚡ Continue as Guest Recruiter (Demo Mode)
+            </button>
+        </form>
+
+        <div class="auth-footer text-center mt-3">
+            <p>New to HireSense AI? <a href="{{ url_for('register') }}">Create an account</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

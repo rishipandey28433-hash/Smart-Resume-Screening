@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}System Settings & Diagnostics — HireSense AI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="header-intro">
+        <h1 class="page-title">Platform Settings & Diagnostics</h1>
+        <p class="page-subtitle">Inspect database health, data privacy controls, and demonstration environments</p>
+    </div>
+</div>
+
+<div class="form-layout-grid">
+    <!-- Left Column: Database & Demonstration Management -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Demonstration Environment Controls</h3>
+        </div>
+        <div class="card-body">
+            <p>
+                HireSense AI supports an isolated demonstration dataset for evaluation sessions. 
+                Loading demo data creates a sample job requisition and 4 realistic candidate profiles with varying match scores.
+            </p>
+            <div class="settings-action-row mt-3">
+                <a href="{{ url_for('seed_demo') }}" class="btn btn-primary">
+                    <span class="btn-icon">✨</span> Seed Synthetic Demo Data
+                </a>
+                <a href="{{ url_for('clear_demo') }}" class="btn btn-outline-danger">
+                    <span class="btn-icon">🗑️</span> Clear Demo Data
+                </a>
+            </div>
+            <small class="text-muted d-block mt-2">
+                Note: Clearing demo data deletes only records flagged with <code>is_demo = 1</code>. Your genuine uploaded resumes and jobs will remain completely untouched.
+            </small>
+
+            <h4 class="mt-4">Database Health & Metrics</h4>
+            <div class="stats-list">
+                <div class="stat-line">
+                    <span>Active Job Requisitions:</span>
+                    <strong>{{ jobs_count }}</strong>
+                </div>
+                <div class="stat-line">
+                    <span>Evaluated Candidates in Pipeline:</span>
+                    <strong>{{ candidates_count }}</strong>
+                </div>
+                <div class="stat-line">
+                    <span>Legacy Resume History Records:</span>
+                    <strong>{{ resumes_count }}</strong>
+                </div>
+                <div class="stat-line">
+                    <span>Database Engine:</span>
+                    <strong>SQLite 3 (resume.db)</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Privacy, Security & Environment -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Data Privacy & Security Protocols</h3>
+        </div>
+        <div class="card-body">
+            <ul class="settings-info-list">
+                <li>
+                    <strong>Secure Document Uploads:</strong>
+                    <p>Filenames are sanitized via <code>werkzeug.utils.secure_filename</code> with random hex prefixes to prevent directory traversal.</p>
+                </li>
+                <li>
+                    <strong>Spreadsheet Injection Prevention:</strong>
+                    <p>All CSV export values beginning with <code>=</code>, <code>+</code>, <code>-</code>, or <code>@</code> are prepended with an apostrophe to prevent DDE code execution in Excel.</p>
+                </li>
+                <li>
+                    <strong>Password Cryptography:</strong>
+                    <p>User credentials are encrypted using PBKDF2 with SHA-256 password hashing. Plaintext passwords are never stored.</p>
+                </li>
+                <li>
+                    <strong>Candidate Privacy Notice:</strong>
+                    <p>Uploaded documents are retained in the local storage volume strictly for the duration of the screening review pipeline.</p>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

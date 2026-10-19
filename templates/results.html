@@ -1,0 +1,461 @@
+{% extends "base.html" %}
+
+{% block title %}Candidate Rankings — {{ job['title'] }} — HireSense AI{% endblock %}
+
+{% block content %}
+<div class="results-top-banner">
+    <div class="job-meta-summary">
+        <div class="job-badges">
+            <span class="badge-dept">{{ job['department'] }}</span>
+            <span class="badge-status">{{ job['status'] }}</span>
+            <span class="badge-count">{{ total_candidates }} Candidates Ranked</span>
+        </div>
+        <h1 class="results-job-title">{{ job['title'] }}</h1>
+        <p class="results-job-desc">{{ job['description'][:220] }}{% if job['description']|length > 220 %}...{% endif %}</p>
+        
+        <div class="job-skills-chips">
+            {% if job['required_skills'] %}
+                <span class="chips-label">Mandatory:</span>
+                {% for s in job['required_skills'].split(',') %}
+                    {% if s.strip() %}
+                        <span class="skill-chip required-chip">{{ s.strip() }}</span>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+
+            {% if job['preferred_skills'] %}
+                <span class="chips-label ml-2">Preferred:</span>
+                {% for s in job['preferred_skills'].split(',') %}
+                    {% if s.strip() %}
+                        <span class="skill-chip preferred-chip">{{ s.strip() }}</span>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="results-action-buttons">
+        <a href="{{ url_for('export_job_csv', job_id=job['id']) }}" class="btn btn-outline-primary" title="Export full ranking table as CSV with spreadsheet formula injection protection">
+            <span class="btn-icon">📊</span> Export CSV
+        </a>
+        <a href="{{ url_for('screen') }}" class="btn btn-primary">
+            <span class="btn-icon">⚡</span> New Screening
+        </a>
+    </div>
+</div>
+
+<!-- Controls: Real-time Search & Filter Toolbar -->
+<div class="table-toolbar card">
+    <div class="search-input-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="candidateSearchInput" class="form-control" placeholder="Search candidate name, email, or skill..." onkeyup="filterCandidates()">
+    </div>
+
+    <div class="filter-group">
+        <label class="filter-label">Status:</label>
+        <div class="btn-group-filter">
+            <button type="button" class="btn-filter active" onclick="setStatusFilter('all', this)">All</button>
+            <button type="button" class="btn-filter" onclick="setStatusFilter('Shortlisted', this)">Shortlisted</button>
+            <button type="button" class="btn-filter" onclick="setStatusFilter('Under Review', this)">Under Review</button>
+            <button type="button" class="btn-filter" onclick="setStatusFilter('Rejected', this)">Rejected</button>
+        </div>
+    </div>
+
+    <div class="filter-group">
+        <label class="filter-label">Score:</label>
+        <select id="scoreFilterSelect" class="form-control form-control-sm" onchange="filterCandidates()">
+            <option value="0">All Scores (0% - 100%)</option>
+            <option value="80">&ge; 80% (High Alignment)</option>
+            <option value="60">&ge; 60% (Moderate Alignment)</option>
+            <option value="40">&ge; 40% (Partial Alignment)</option>
+        </select>
+    </div>
+</div>
+
+<!-- Candidate Rankings Table -->
+<div class="card ranking-card">
+    <div class="table-responsive">
+        <table class="data-table" id="rankingTable">
+            <thead>
+                <tr>
+                    <th width="60">Rank</th>
+                    <th>Candidate Profile</th>
+                    <th width="140">Match Score</th>
+                    <th width="160">Score Breakdown</th>
+                    <th>Skills Match</th>
+                    <th width="140">Review Status</th>
+                    <th width="140">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cand in candidates %}
+                    <tr class="candidate-row" 
+                        data-name="{{ cand['name']|lower }}" 
+                        data-email="{{ cand['email']|lower }}" 
+                        data-skills="{{ cand['matched_skills']|lower }} {{ cand['missing_skills']|lower }}" 
+                        data-status="{{ cand['status'] }}" 
+                        data-score="{{ cand['score'] }}">
+                        
+                        <!-- Rank -->
+                        <td class="text-center">
+                            <span class="rank-badge {% if loop.index == 1 %}rank-gold{% elif loop.index == 2 %}rank-silver{% elif loop.index == 3 %}rank-bronze{% endif %}">
+                                #{{ loop.index }}
+                            </span>
+                        </td>
+
+                        <!-- Profile -->
+                        <td>
+                            <div class="candidate-profile-cell">
+                                <div class="cand-avatar">{{ cand['name'][:1] }}</div>
+                                <div class="cand-details">
+                                    <h4 class="cand-name">
+                                        {{ cand['name'] }}
+                                        {% if cand['is_demo'] %}
+                                            <span class="demo-tag" title="Synthetic sample candidate for demonstration">Demo</span>
+                                        {% endif %}
+                                    </h4>
+                                    <div class="cand-contact">
+                                        {% if cand['email'] %}
+                                            <span class="contact-item">✉️ {{ cand['email'] }}</span>
+                                        {% endif %}
+                                        {% if cand['phone'] %}
+                                            <span class="contact-item">📞 {{ cand['phone'] }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="cand-links">
+                                        {% if cand['github'] and cand['github'] != 'Mentioned' %}
+                                            <a href="{{ cand['github'] }}" target="_blank" rel="noopener" class="link-tag">GitHub &nearr;</a>
+                                        {% endif %}
+                                        {% if cand['linkedin'] and cand['linkedin'] != 'Mentioned' %}
+                                            <a href="{{ cand['linkedin'] }}" target="_blank" rel="noopener" class="link-tag">LinkedIn &nearr;</a>
+                                        {% endif %}
+                                        <span class="cand-filename">📄 {{ cand['filename'] }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Overall Match Score -->
+                        <td>
+                            <div class="score-display">
+                                <span class="score-number {% if cand['score'] >= 80 %}score-high{% elif cand['score'] >= 60 %}score-mid{% elif cand['score'] >= 40 %}score-fair{% else %}score-low{% endif %}">
+                                    {{ "%.1f"|format(cand['score']) }}%
+                                </span>
+                                <span class="score-tier">{{ cand['recommendation'] }}</span>
+                            </div>
+                        </td>
+
+                        <!-- Breakdown: Text vs Skill -->
+                        <td>
+                            <div class="breakdown-bars">
+                                <div class="breakdown-item">
+                                    <div class="bar-labels">
+                                        <span>Skills Match</span>
+                                        <strong>{{ "%.0f"|format(cand['skill_score']) }}%</strong>
+                                    </div>
+                                    <div class="progress-track">
+                                        <div class="progress-fill fill-skill" style="width: {{ cand['skill_score'] }}%;"></div>
+                                    </div>
+                                </div>
+                                <div class="breakdown-item">
+                                    <div class="bar-labels">
+                                        <span>Text Similarity</span>
+                                        <strong>{{ "%.0f"|format(cand['text_similarity']) }}%</strong>
+                                    </div>
+                                    <div class="progress-track">
+                                        <div class="progress-fill fill-text" style="width: {{ cand['text_similarity'] }}%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Skills Tags -->
+                        <td>
+                            <div class="skills-cell">
+                                {% if cand['matched_skills'] %}
+                                    <div class="matched-group">
+                                        {% for s in cand['matched_skills'].split(',') %}
+                                            {% if s.strip() %}
+                                                <span class="pill-skill pill-matched" title="Matched required skill">✓ {{ s.strip() }}</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+
+                                {% if cand['missing_skills'] %}
+                                    <div class="missing-group">
+                                        {% for s in cand['missing_skills'].split(',') %}
+                                            {% if s.strip() %}
+                                                <span class="pill-skill pill-missing" title="Missing required skill">✗ {{ s.strip() }}</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <!-- Status Selection -->
+                        <td>
+                            <form action="{{ url_for('update_candidate_status', candidate_id=cand['id']) }}" method="POST" class="status-form">
+                                <input type="hidden" name="job_id" value="{{ job['id'] }}">
+                                <select name="status" class="status-select status-{{ cand['status']|lower|replace(' ', '-') }}" onchange="this.form.submit()">
+                                    <option value="New" {% if cand['status'] == 'New' %}selected{% endif %}>New</option>
+                                    <option value="Shortlisted" {% if cand['status'] == 'Shortlisted' %}selected{% endif %}>Shortlisted</option>
+                                    <option value="Under Review" {% if cand['status'] == 'Under Review' %}selected{% endif %}>Under Review</option>
+                                    <option value="Rejected" {% if cand['status'] == 'Rejected' %}selected{% endif %}>Rejected</option>
+                                </select>
+                            </form>
+                        </td>
+
+                        <!-- Actions -->
+                        <td>
+                            <div class="action-cell">
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="openAssessmentModal({{ cand['id'] }})">
+                                    Insights
+                                </button>
+                                <a href="{{ url_for('candidate_pdf', candidate_id=cand['id']) }}" class="btn btn-sm btn-outline-secondary" title="Download PDF Candidate Evaluation Report">
+                                    PDF
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Hidden JSON data for Modal -->
+                    <script type="application/json" id="cand-data-{{ cand['id'] }}">
+                        {
+                            "id": {{ cand['id'] }},
+                            "name": {{ cand['name']|tojson }},
+                            "email": {{ (cand['email'] or 'Not provided')|tojson }},
+                            "phone": {{ (cand['phone'] or 'Not provided')|tojson }},
+                            "filename": {{ cand['filename']|tojson }},
+                            "score": {{ cand['score'] }},
+                            "text_similarity": {{ cand['text_similarity'] }},
+                            "skill_score": {{ cand['skill_score'] }},
+                            "recommendation": {{ cand['recommendation']|tojson }},
+                            "matched_skills": {{ (cand['matched_skills'] or '')|tojson }},
+                            "missing_skills": {{ (cand['missing_skills'] or '')|tojson }},
+                            "matched_preferred": {{ (cand['matched_preferred'] or '')|tojson }},
+                            "status": {{ cand['status']|tojson }},
+                            "notes": {{ (cand['notes'] or '')|tojson }},
+                            "raw_text": {{ (cand['raw_text'] or 'No text excerpt stored.')|tojson }}
+                        }
+                    </script>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Candidate Assessment Modal -->
+<div id="assessmentModal" class="modal-overlay" style="display:none;" onclick="closeModalOnBackdrop(event)">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <div>
+                <h3 class="modal-title" id="modalCandName">Candidate Assessment</h3>
+                <span class="modal-subtitle" id="modalCandMeta">Screening Details</span>
+            </div>
+            <button type="button" class="modal-close" onclick="closeAssessmentModal()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+            <!-- Score Highlights -->
+            <div class="modal-score-banner">
+                <div class="modal-score-circle">
+                    <span id="modalScoreNum" class="big-score">--</span>
+                    <span class="score-subtext">Overall Match</span>
+                </div>
+                <div class="modal-score-details">
+                    <h4 id="modalRecommendation">Recommendation Tier</h4>
+                    <p class="modal-formula-desc">
+                        Weighted Match: 40% Textual Similarity (<span id="modalTextSim">--</span>%) + 
+                        40% Required Skills (<span id="modalSkillScore">--</span>%) + 
+                        10% Preferred Skills + 10% Experience Alignment.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Skills Comparison -->
+            <div class="modal-section">
+                <h4>Mandatory Skills Analysis</h4>
+                <div class="modal-skills-grid">
+                    <div class="skills-box box-matched">
+                        <h5>✓ Matched Skills</h5>
+                        <div id="modalMatchedSkills" class="modal-chips">None</div>
+                    </div>
+                    <div class="skills-box box-missing">
+                        <h5>✗ Missing Skills</h5>
+                        <div id="modalMissingSkills" class="modal-chips">None</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recruiter Notes Form -->
+            <div class="modal-section">
+                <h4>Recruiter Interview Notes</h4>
+                <form id="notesForm" onsubmit="saveCandidateNotes(event)">
+                    <input type="hidden" id="modalCandidateId" name="candidate_id">
+                    <input type="hidden" name="job_id" value="{{ job['id'] }}">
+                    <textarea id="modalNotesText" name="notes" rows="3" class="form-control" placeholder="Add confidential recruiter notes, interview observations, or next steps..."></textarea>
+                    <div class="mt-2 text-right">
+                        <button type="submit" class="btn btn-sm btn-primary" id="saveNotesBtn">Save Notes</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Extracted Text Excerpt -->
+            <div class="modal-section">
+                <h4>Extracted Resume Text Excerpt</h4>
+                <div class="resume-text-box">
+                    <pre id="modalRawText">Loading text...</pre>
+                </div>
+            </div>
+
+            <!-- Ethical AI Notice -->
+            <div class="modal-disclaimer">
+                <strong>Responsible AI Notice:</strong> This match score is an algorithmic screening aid based solely on 
+                job-related keywords and text similarity. Final hiring decisions must be made by human recruiters.
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <a href="#" id="modalPdfBtn" class="btn btn-outline-primary btn-sm">Download Evaluation PDF</a>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeAssessmentModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let activeStatusFilter = 'all';
+
+function filterCandidates() {
+    const searchVal = document.getElementById('candidateSearchInput').value.toLowerCase().trim();
+    const scoreVal = parseFloat(document.getElementById('scoreFilterSelect').value) || 0;
+    const rows = document.querySelectorAll('.candidate-row');
+
+    rows.forEach(row => {
+        const name = row.getAttribute('data-name');
+        const email = row.getAttribute('data-email');
+        const skills = row.getAttribute('data-skills');
+        const status = row.getAttribute('data-status');
+        const score = parseFloat(row.getAttribute('data-score')) || 0;
+
+        const matchesSearch = !searchVal || name.includes(searchVal) || email.includes(searchVal) || skills.includes(searchVal);
+        const matchesStatus = activeStatusFilter === 'all' || status === activeStatusFilter;
+        const matchesScore = score >= scoreVal;
+
+        if (matchesSearch && matchesStatus && matchesScore) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+function setStatusFilter(status, btnElement) {
+    activeStatusFilter = status;
+    document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+    if (btnElement) btnElement.classList.add('active');
+    filterCandidates();
+}
+
+function openAssessmentModal(candId) {
+    const dataElem = document.getElementById('cand-data-' + candId);
+    if (!dataElem) return;
+
+    const data = JSON.parse(dataElem.textContent);
+    document.getElementById('modalCandidateId').value = data.id;
+    document.getElementById('modalCandName').textContent = data.name;
+    document.getElementById('modalCandMeta').textContent = `${data.filename} • ${data.email} • ${data.phone}`;
+    document.getElementById('modalScoreNum').textContent = `${data.score.toFixed(1)}%`;
+    document.getElementById('modalTextSim').textContent = data.text_similarity.toFixed(1);
+    document.getElementById('modalSkillScore').textContent = data.skill_score.toFixed(1);
+    document.getElementById('modalRecommendation').textContent = data.recommendation;
+    document.getElementById('modalNotesText').value = data.notes || '';
+    document.getElementById('modalRawText').textContent = data.raw_text || 'No text extracted.';
+    document.getElementById('modalPdfBtn').href = `/candidate/${data.id}/pdf`;
+
+    // Render Matched Skills Chips
+    const matchedContainer = document.getElementById('modalMatchedSkills');
+    matchedContainer.innerHTML = '';
+    if (data.matched_skills && data.matched_skills.trim()) {
+        data.matched_skills.split(',').forEach(s => {
+            if (s.trim()) {
+                const span = document.createElement('span');
+                span.className = 'pill-skill pill-matched';
+                span.textContent = '✓ ' + s.trim();
+                matchedContainer.appendChild(span);
+            }
+        });
+    } else {
+        matchedContainer.textContent = 'None identified';
+    }
+
+    // Render Missing Skills Chips
+    const missingContainer = document.getElementById('modalMissingSkills');
+    missingContainer.innerHTML = '';
+    if (data.missing_skills && data.missing_skills.trim()) {
+        data.missing_skills.split(',').forEach(s => {
+            if (s.trim()) {
+                const span = document.createElement('span');
+                span.className = 'pill-skill pill-missing';
+                span.textContent = '✗ ' + s.trim();
+                missingContainer.appendChild(span);
+            }
+        });
+    } else {
+        missingContainer.textContent = 'None missing';
+    }
+
+    document.getElementById('assessmentModal').style.display = 'flex';
+}
+
+function closeAssessmentModal() {
+    document.getElementById('assessmentModal').style.display = 'none';
+}
+
+function closeModalOnBackdrop(e) {
+    if (e.target.id === 'assessmentModal') {
+        closeAssessmentModal();
+    }
+}
+
+function saveCandidateNotes(e) {
+    e.preventDefault();
+    const candId = document.getElementById('modalCandidateId').value;
+    const notesText = document.getElementById('modalNotesText').value;
+    const btn = document.getElementById('saveNotesBtn');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    const formData = new FormData();
+    formData.append('notes', notesText);
+
+    fetch(`/candidate/${candId}/notes`, {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        btn.disabled = false;
+        btn.textContent = 'Saved!';
+        setTimeout(() => { btn.textContent = 'Save Notes'; }, 2000);
+        // Update local stored script
+        const dataElem = document.getElementById('cand-data-' + candId);
+        if (dataElem) {
+            const candObj = JSON.parse(dataElem.textContent);
+            candObj.notes = notesText;
+            dataElem.textContent = JSON.stringify(candObj);
+        }
+    })
+    .catch(err => {
+        btn.disabled = false;
+        btn.textContent = 'Save Notes';
+        alert('Could not save notes. Please try again.');
+    });
+}
+</script>
+{% endblock %}

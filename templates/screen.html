@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block title %}New Screening Session — HireSense AI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="header-intro">
+        <h1 class="page-title">Initiate Candidate AI Screening</h1>
+        <p class="page-subtitle">Configure job requirements and upload multiple candidate resumes for automated scoring and ranking</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('seed_demo') }}" class="btn btn-outline-secondary">
+            <span>✨</span> Use Sample Candidate Dataset
+        </a>
+    </div>
+</div>
+
+<form action="{{ url_for('screen') }}" method="POST" enctype="multipart/form-data" class="screen-form" id="screeningForm">
+    <div class="form-layout-grid">
+        <!-- Left Section: Job Specifications -->
+        <div class="form-card card">
+            <div class="card-header">
+                <h2 class="card-title">1. Target Job Requirements</h2>
+                <div class="job-toggle-container">
+                    <label class="radio-label">
+                        <input type="radio" name="job_selection" value="new" checked onclick="toggleJobFields(false)">
+                        Create New Opening
+                    </label>
+                    {% if jobs %}
+                    <label class="radio-label">
+                        <input type="radio" name="job_selection" value="existing" onclick="toggleJobFields(true)">
+                        Use Existing Job
+                    </label>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card-body">
+                {% if jobs %}
+                <div class="form-group" id="existingJobGroup" style="display:none;">
+                    <label for="existing_job_id" class="form-label">Select Active Job Opening</label>
+                    <select name="existing_job_id" id="existing_job_id" class="form-control">
+                        <option value="">-- Choose Existing Job --</option>
+                        {% for j in jobs %}
+                            <option value="{{ j['id'] }}">{{ j['title'] }} ({{ j['department'] }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+                <div id="newJobFields">
+                    <div class="form-row">
+                        <div class="form-group col-md-8">
+                            <label for="job_title" class="form-label">Job Title <span class="required">*</span></label>
+                            <input type="text" name="job_title" id="job_title" class="form-control" placeholder="e.g. Senior Full Stack Engineer" required>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="department" class="form-label">Department</label>
+                            <select name="department" id="department" class="form-control">
+                                <option value="Engineering">Engineering</option>
+                                <option value="Product">Product</option>
+                                <option value="Data Science & AI">Data Science & AI</option>
+                                <option value="Design">Design</option>
+                                <option value="Marketing">Marketing</option>
+                                <option value="Operations">Operations</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="job_description" class="form-label">
+                            Job Description <span class="required">*</span>
+                            <small class="text-muted">(Paste full responsibilities and qualifications)</small>
+                        </label>
+                        <textarea name="job_description" id="job_description" rows="7" class="form-control" placeholder="Paste the full job specification here. The AI will extract context, required competencies, and semantic keywords..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="required_skills" class="form-label">
+                            Mandatory Technical Skills (Comma-separated)
+                            <small class="text-muted">(Or leave blank for automatic NLP extraction from JD)</small>
+                        </label>
+                        <input type="text" name="required_skills" id="required_skills" class="form-control" placeholder="e.g. Python, Flask, React, SQL, Git, REST API">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="preferred_skills" class="form-label">Preferred / Bonus Skills</label>
+                            <input type="text" name="preferred_skills" id="preferred_skills" class="form-control" placeholder="e.g. Docker, AWS, Kubernetes, Scikit-Learn">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="min_experience" class="form-label">Experience Requirement</label>
+                            <select name="min_experience" id="min_experience" class="form-control">
+                                <option value="0-1 years (Entry/Fresher)">0-1 years (Entry / Fresher)</option>
+                                <option value="1-3 years (Junior)">1-3 years (Junior)</option>
+                                <option value="3-5 years (Mid-Level)" selected>3-5 years (Mid-Level)</option>
+                                <option value="5+ years (Senior)">5+ years (Senior)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Section: Resume Upload & Scoring Info -->
+        <div class="form-side-column">
+            <div class="form-card card">
+                <div class="card-header">
+                    <h2 class="card-title">2. Upload Candidate Resumes</h2>
+                </div>
+                <div class="card-body">
+                    <p class="section-desc">
+                        Select one or multiple resumes to screen simultaneously. Supported formats: <strong>.pdf, .docx, .txt</strong> (Max 25MB total).
+                    </p>
+
+                    <div class="file-dropzone" id="dropzone">
+                        <div class="dropzone-icon">📤</div>
+                        <div class="dropzone-text">
+                            <strong>Choose files</strong> or drag & drop them here
+                        </div>
+                        <div class="dropzone-formats">
+                            PDF, DOCX, or Plain Text resumes
+                        </div>
+                        <input type="file" name="resumes" id="resumeInput" multiple accept=".pdf,.docx,.txt" class="dropzone-input" required onchange="handleFileSelect(this)">
+                    </div>
+
+                    <div id="fileListContainer" class="selected-files-list" style="display:none;">
+                        <h4>Selected Resumes (<span id="fileCount">0</span>)</h4>
+                        <ul id="selectedFiles" class="files-ul"></ul>
+                    </div>
+
+                    <div class="scoring-explainer-box">
+                        <div class="explainer-header">
+                            <span class="explainer-icon">🧠</span>
+                            <strong>Transparent Ranking Formula</strong>
+                        </div>
+                        <ul class="explainer-list">
+                            <li><strong>40%</strong> Contextual Text Similarity (TF-IDF Cosine)</li>
+                            <li><strong>40%</strong> Mandatory Skills Coverage</li>
+                            <li><strong>10%</strong> Preferred Skills Coverage</li>
+                            <li><strong>10%</strong> Experience Level Alignment</li>
+                        </ul>
+                        <div class="explainer-note">
+                            Ethical AI Guarantee: Evaluation is strictly job-related. Protected attributes (name, gender, age) are never used in scoring.
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block btn-lg" id="submitBtn">
+                        <span class="btn-icon">🚀</span> Run AI Screening Pipeline
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Processing Overlay Modal -->
+<div id="loadingOverlay" class="loading-overlay" style="display:none;">
+    <div class="loading-card">
+        <div class="spinner"></div>
+        <h3>HireSense AI Engine is Processing...</h3>
+        <p>Extracting resume text &bull; Identifying competencies &bull; Vectorizing TF-IDF &bull; Ranking candidates</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function toggleJobFields(useExisting) {
+    const existingGroup = document.getElementById('existingJobGroup');
+    const newFields = document.getElementById('newJobFields');
+    const jobTitleInput = document.getElementById('job_title');
+    const jobDescInput = document.getElementById('job_description');
+
+    if (useExisting) {
+        if (existingGroup) existingGroup.style.display = 'block';
+        if (newFields) newFields.style.display = 'none';
+        jobTitleInput.removeAttribute('required');
+        jobDescInput.removeAttribute('required');
+    } else {
+        if (existingGroup) existingGroup.style.display = 'none';
+        if (newFields) newFields.style.display = 'block';
+        jobTitleInput.setAttribute('required', 'required');
+        jobDescInput.setAttribute('required', 'required');
+    }
+}
+
+function handleFileSelect(input) {
+    const listContainer = document.getElementById('fileListContainer');
+    const filesUl = document.getElementById('selectedFiles');
+    const countSpan = document.getElementById('fileCount');
+
+    filesUl.innerHTML = '';
+    if (!input.files || input.files.length === 0) {
+        listContainer.style.display = 'none';
+        return;
+    }
+
+    countSpan.textContent = input.files.length;
+    listContainer.style.display = 'block';
+
+    for (let i = 0; i < input.files.length; i++) {
+        const file = input.files[i];
+        const li = document.createElement('li');
+        const sizeKb = (file.size / 1024).toFixed(1);
+        li.innerHTML = `<span>📄 <strong>${file.name}</strong> (${sizeKb} KB)</span>`;
+        filesUl.appendChild(li);
+    }
+}
+
+document.getElementById('screeningForm').addEventListener('submit', function() {
+    document.getElementById('loadingOverlay').style.display = 'flex';
+});
+</script>
+{% endblock %}

@@ -1,81 +1,96 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Resume Screening | Rishi Pandey</title>
+{% block title %}HireSense AI — Smarter Screening. Better Hiring.{% endblock %}
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-
-
-
-
-<body>
-    <nav class="navbar">
-
-    <div class="logo">
-        🤖 AI Resume Screening
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-center">
+    <div class="hero-badge">
+        <span class="badge-dot"></span> Next-Gen Talent Acquisition Prototype
     </div>
-
-    <div class="menu">
-
-        <a href="/">🏠 Home</a>
-
-        <a href="/history">📋 History</a>
-
-        <span class="creator">
-            👨‍💻 Rishi Pandey
-        </span>
-
-    </div>
-
-</nav>
-
-<div class="container">
-
-    <h1>🤖 AI Resume Screening & Candidate Ranking Tool</h1>
-
-    <div class="developer">
-        <p>Professional AI Powered Hiring Assistant</p>
-
-        <h2 class="developer-name">
-          
-        </h2>
-    </div>
-
-    <p>
-        Upload your Resume and paste the Job Description to calculate the AI Match Score.
+    <h1 class="hero-title">
+        Smarter Screening.<br>
+        <span class="hero-highlight">Better Hiring.</span>
+    </h1>
+    <p class="hero-subtitle max-w-750 mx-auto">
+        HireSense AI transforms technical candidate screening. Automatically parse multi-format resumes, 
+        evaluate contextual TF-IDF relevance, identify critical skill gaps, and rank candidates with transparent, explainable scoring.
     </p>
 
-    <form action="/upload" method="POST" enctype="multipart/form-data">
+    <div class="hero-cta-group">
+        <a href="{{ url_for('screen') }}" class="btn btn-primary btn-lg">
+            <span class="btn-icon">⚡</span> Start Multi-Candidate Screening
+        </a>
+        <a href="{{ url_for('seed_demo') }}" class="btn btn-outline-secondary btn-lg">
+            <span class="btn-icon">✨</span> Explore Demo Pipeline
+        </a>
+    </div>
+</section>
 
-        <input
-            type="file"
-            name="resume"
-            accept=".pdf,.doc,.docx"
-            required>
+<!-- Quick Single-Resume Analysis Card (Preserved Legacy Single Workflow) -->
+<section class="quick-analysis-section mt-5">
+    <div class="card max-w-800 mx-auto shadow-lg">
+        <div class="card-header bg-gradient-navy text-white">
+            <h2 class="card-title text-white">⚡ Quick Instant Resume Check</h2>
+            <p class="card-subtitle text-white-50">Upload a single resume against a target job description for an immediate match score.</p>
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('legacy_upload') }}" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="resume" class="form-label">
+                        <strong>1. Select Candidate Resume (PDF, DOCX, or TXT)</strong>
+                    </label>
+                    <input type="file" name="resume" id="resume" class="form-control file-input-styled" accept=".pdf,.docx,.txt" required>
+                </div>
 
-        <br><br>
+                <div class="form-group mt-3">
+                    <label for="job_description" class="form-label">
+                        <strong>2. Paste Job Description</strong>
+                    </label>
+                    <textarea name="job_description" id="job_description" rows="5" class="form-control" placeholder="Paste the job responsibilities, required technical skills, and experience criteria here..." required></textarea>
+                </div>
 
-        <textarea
-            name="job_description"
-            rows="8"
-            placeholder="Paste Job Description Here..."
-            required></textarea>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary btn-block btn-lg">
+                        🚀 Run Instant Match Analysis
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
 
-        <br><br>
+<!-- Feature Value Grid -->
+<section class="features-section mt-5">
+    <div class="section-title-wrap text-center mb-4">
+        <h2>Why Hiring Teams Choose HireSense AI</h2>
+        <p class="text-muted">Designed specifically to solve high-volume engineering recruitment challenges</p>
+    </div>
 
-        <button type="submit">
-            🚀 Analyze Resume
-        </button>
+    <div class="feature-cards-grid">
+        <div class="card feature-card">
+            <div class="feature-icon bg-blue">🧠</div>
+            <h3>Transparent Hybrid Scoring</h3>
+            <p>Combines 40% TF-IDF textual semantic similarity with 40% mandatory skill coverage, 10% preferred skills, and 10% experience alignment.</p>
+        </div>
 
-    </form>
+        <div class="card feature-card">
+            <div class="feature-icon bg-indigo">📁</div>
+            <h3>Multi-Format Text Extraction</h3>
+            <p>Seamlessly extracts text from PDF and DOCX files. Built-in fault tolerance handles unreadable or corrupt documents gracefully.</p>
+        </div>
 
-</div>
+        <div class="card feature-card">
+            <div class="feature-icon bg-emerald">🎯</div>
+            <h3>Skill Gap Identification</h3>
+            <p>Clearly segregates matched skills from missing mandatory skills. Empowers interviewers to focus on verified candidate competencies.</p>
+        </div>
 
-</body>
-
-
-</html>
+        <div class="card feature-card">
+            <div class="feature-icon bg-amber">⚖️</div>
+            <h3>Ethical & Responsible AI</h3>
+            <p>Ranks candidates strictly by job-related technical competencies. Completely ignores protected attributes such as age, gender, or background.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

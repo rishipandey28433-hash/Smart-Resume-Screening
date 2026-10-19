@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error — HireSense AI{% endblock %}
+
+{% block content %}
+<div class="empty-state card my-5 py-5 text-center">
+    <div class="empty-icon" style="font-size: 64px;">⚠️</div>
+    <h1 class="page-title mt-3">500 — Application Processing Error</h1>
+    <p class="page-subtitle max-w-500 mx-auto">
+        An unexpected error occurred while processing the request. No confidential candidate data was compromised.
+    </p>
+    <div class="mt-4">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Back to Safety</a>
+    </div>
+</div>
+{% endblock %}

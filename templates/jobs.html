@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Job Openings & Screening Sessions — HireSense AI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="header-intro">
+        <h1 class="page-title">Job Openings & Screening Pipelines</h1>
+        <p class="page-subtitle">Manage open requisitions, view applicant pools, and inspect candidate rankings</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('screen') }}" class="btn btn-primary">
+            <span class="btn-icon">⚡</span> Create New Screening
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    {% if jobs %}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Job Requisition</th>
+                        <th>Department</th>
+                        <th>Required Competencies</th>
+                        <th class="text-center">Total Candidates</th>
+                        <th class="text-center">Shortlisted</th>
+                        <th class="text-center">Avg Match</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in jobs %}
+                        <tr>
+                            <td>
+                                <div class="job-cell-title">
+                                    <strong>{{ job['title'] }}</strong>
+                                    <span class="badge-status">{{ job['status'] }}</span>
+                                    <small class="text-muted d-block">Created: {{ job['created_at'][:10] if job['created_at'] else 'Recent' }}</small>
+                                </div>
+                            </td>
+                            <td>{{ job['department'] }}</td>
+                            <td>
+                                <div class="skills-cell">
+                                    {% if job['required_skills'] %}
+                                        {% for s in job['required_skills'].split(',')[:4] %}
+                                            {% if s.strip() %}
+                                                <span class="skill-chip required-chip">{{ s.strip() }}</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="text-muted">NLP Auto-detected</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span class="count-badge">{{ job['candidate_count'] }}</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge-success-count">{{ job['shortlisted_count'] or 0 }}</span>
+                            </td>
+                            <td class="text-center">
+                                {% if job['avg_score'] %}
+                                    <strong>{{ "%.1f"|format(job['avg_score']) }}%</strong>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group-actions">
+                                    <a href="{{ url_for('results', job_id=job['id']) }}" class="btn btn-sm btn-primary">
+                                        Review Pipeline
+                                    </a>
+                                    <a href="{{ url_for('export_job_csv', job_id=job['id']) }}" class="btn btn-sm btn-outline-secondary" title="Export CSV Report">
+                                        CSV
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📁</div>
+            <h3>No Job Openings Created Yet</h3>
+            <p>Define a new job description and upload candidate resumes to establish your first screening pipeline.</p>
+            <a href="{{ url_for('screen') }}" class="btn btn-primary">Create Job & Screen Resumes</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
